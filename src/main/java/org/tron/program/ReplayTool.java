@@ -66,7 +66,7 @@ public class ReplayTool {
     long replayIndex = 0;
 
     logger.info("replay solidified block start");
-    while (iterator.hasNext() && replayIndex <= latestSolidifiedBlockNum) {
+    while (replayIndex <= latestSolidifiedBlockNum && iterator.hasNext()) {
       BlockCapsule blockCapsule = (BlockCapsule) iterator.next();
       if (replayIndex == 0) {
         // skip Genesis Block
@@ -92,7 +92,7 @@ public class ReplayTool {
 
 
     logger.info("delete non-solidified block start");
-    if (replayIndex != 1L && (replayIndex - 1 != latestSolidifiedBlockNum)) {
+    if (replayIndex != 1L) {
       while (iterator.hasNext()) {
         BlockCapsule blockCapsule = (BlockCapsule) iterator.next();
         logger.info("delete :" + blockCapsule.toString());
@@ -101,7 +101,6 @@ public class ReplayTool {
     }
     logger.info("delete non-solidified block complete");
     logger.info("replay solidified block complete");
-    logger.info("replay" + replayIndex);
     logger.info("local LatestSolidifiedBlockNum:" + latestSolidifiedBlockNum);
     logger.info("LatestSolidifiedBlockNum:" + dbManager.getDynamicPropertiesStore()
         .getLatestSolidifiedBlockNum());
