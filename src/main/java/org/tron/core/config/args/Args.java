@@ -173,8 +173,9 @@ public class Args {
 
   @Getter
   @Setter
-  @Parameter(names = {"--need—replay"}, description = "need-replay")
-  private boolean needReplay;
+  @Parameter(names = {"--need-replay"}, description = "need-replay")
+  private boolean needReplay = false;
+
 
   public static void clearParam() {
     INSTANCE.outputDirectory = "output-directory";
@@ -209,6 +210,7 @@ public class Args {
     INSTANCE.p2pNodeId = "";
     INSTANCE.solidityNode = false;
     INSTANCE.trustNodeAddr = "";
+    INSTANCE.needReplay = false;
   }
 
   /**
