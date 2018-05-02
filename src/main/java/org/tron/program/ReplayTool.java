@@ -50,23 +50,33 @@ public class ReplayTool {
 
     ApplicationContext context = new AnnotationConfigApplicationContext(DefaultConfig.class);
     Manager dbManager = context.getBean(Manager.class);
-    replayBlock(dbManager);
+//    replayBlock(dbManager);
+
+    replayBlock(dbManager, 100L);
+
+    System.exit(0);
   }
 
 
   public static void replayBlock(Manager dbManager) throws BadBlockException {
-    long latestSolidifiedBlockNum = dbManager.getDynamicPropertiesStore()
+    long replayTo = dbManager.getDynamicPropertiesStore()
         .getLatestSolidifiedBlockNum();
+
+    replayBlock(dbManager, replayTo);
+  }
+
+
+  public static void replayBlock(Manager dbManager, long replayTo) throws BadBlockException {
     BlockStore localBlockStore = dbManager.getBlockStore();
 
-    logger.info("local db latestSolidifiedBlockNum:" + latestSolidifiedBlockNum);
+    logger.info("To replay block to:" + replayTo);
 
-    dbManager.resetDynamicProperties();
+    dbManager.resetToGenesisBlock();
     Iterator iterator = localBlockStore.iterator();
     long replayIndex = 0;
 
-    logger.info("replay solidified block start");
-    while (replayIndex <= latestSolidifiedBlockNum && iterator.hasNext()) {
+    logger.info("Replay solidified block start");
+    while (replayIndex <= replayTo && iterator.hasNext()) {
       BlockCapsule blockCapsule = (BlockCapsule) iterator.next();
       if (replayIndex == 0) {
         // skip Genesis Block
@@ -77,7 +87,7 @@ public class ReplayTool {
         dbManager.replayBlock(blockCapsule);
         dbManager.getDynamicPropertiesStore()
             .saveLatestSolidifiedBlockNum(replayIndex);
-        logger.info(String.format("replay block %d", replayIndex));
+        logger.info(String.format("replay block %d success", replayIndex));
         replayIndex++;
       } catch (ValidateSignatureException e) {
         throw new BadBlockException("validate signature exception");
@@ -90,19 +100,19 @@ public class ReplayTool {
       }
     }
 
-
     logger.info("delete non-solidified block start");
     if (replayIndex != 1L) {
       while (iterator.hasNext()) {
         BlockCapsule blockCapsule = (BlockCapsule) iterator.next();
-        logger.info("delete :" + blockCapsule.toString());
+        logger.info("delete block:" + blockCapsule.toString());
         dbManager.getBlockStore().delete(blockCapsule.getBlockId().getBytes());
       }
     }
-    logger.info("delete non-solidified block complete");
-    logger.info("replay solidified block complete");
-    logger.info("local LatestSolidifiedBlockNum:" + latestSolidifiedBlockNum);
-    logger.info("LatestSolidifiedBlockNum:" + dbManager.getDynamicPropertiesStore()
+    logger.info("Delete non-solidified block complete");
+
+    logger.info("Replay solidified block complete");
+    logger.info("Local LatestSolidifiedBlockNum:" + replayTo);
+    logger.info("Current LatestSolidifiedBlockNum:" + dbManager.getDynamicPropertiesStore()
         .getLatestSolidifiedBlockNum());
 
   }

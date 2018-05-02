@@ -309,13 +309,8 @@ public class Manager {
     }
   }
 
-  public void resetDynamicProperties() {
-    this.dynamicPropertiesStore.saveLatestBlockHeaderNumber(0);
-    this.dynamicPropertiesStore.saveLatestBlockHeaderHash(
-            this.genesisBlock.getBlockId().getByteString());
-    this.dynamicPropertiesStore.saveLatestBlockHeaderTimestamp(
-            this.genesisBlock.getTimeStamp());
-    this.dynamicPropertiesStore.saveLatestSolidifiedBlockNum(0);
+  public void resetToGenesisBlock() {
+    this.dynamicPropertiesStore.resetToGenesisBlock();
 
     this.initAccount();
     this.initWitness();
@@ -534,7 +529,6 @@ public class Manager {
   public synchronized void pushBlock(final BlockCapsule block)
       throws ValidateSignatureException, ContractValidateException, ContractExeException,
       UnLinkedBlockException, ValidateScheduleException {
-
     try (PendingManager pm = new PendingManager(this)) {
 
       if (!block.generatedByMyself) {
@@ -934,8 +928,9 @@ public class Manager {
     for (TransactionCapsule transactionCapsule : block.getTransactions()) {
       processTransaction(transactionCapsule);
     }
-
+    logger.error("block num=" + block.getNum() + " block time:" + block.getTimeStamp());
     boolean needMaint = needMaintenance(block.getTimeStamp());
+    logger.error("needMaint" + needMaint);
     if (needMaint) {
       if (block.getNum() == 1) {
         this.dynamicPropertiesStore.updateNextMaintenanceTime(block.getTimeStamp());
@@ -991,6 +986,9 @@ public class Manager {
    * Determine if the current time is maintenance time.
    */
   public boolean needMaintenance(long blockTime) {
+    logger.error(
+        " this.dynamicPropertiesStore.getNextMaintenanceTime()=" + this.dynamicPropertiesStore
+            .getNextMaintenanceTime());
     return this.dynamicPropertiesStore.getNextMaintenanceTime() <= blockTime;
   }
 
