@@ -337,6 +337,7 @@ public class NodeImpl extends PeerConnectionDelegate implements Node {
       BlockCache.put(msg.getMessageId(), (BlockMessage) msg);
       type = InventoryType.BLOCK;
     } else if (msg instanceof TransactionMessage) {
+      logger.info("taihao broadcast transaction:"+ msg.getMessageId());
       TrxCache.put(msg.getMessageId(), (TransactionMessage) msg);
       type = InventoryType.TRX;
     } else {

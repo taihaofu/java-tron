@@ -224,6 +224,7 @@ public class Wallet {
         return builder.setResult(false).setCode(response_code.SERVER_BUSY).build();
       } else {
         dbManager.pushTransactions(trx);
+        logger.info("taihao wallet broadcastTransaction:" + trx.getTransactionId());
         p2pNode.broadcast(message);
         return builder.setResult(true).setCode(response_code.SUCCESS).build();
       }

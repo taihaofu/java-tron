@@ -466,6 +466,7 @@ public class Manager {
     logger.info("push transaction");
     if (getTransactionStore().get(trx.getTransactionId().getBytes()) != null) {
       logger.debug(getTransactionStore().get(trx.getTransactionId().getBytes()).toString());
+      logger.info("taihao "+ trx.getTransactionId());
       throw new DupTransactionException("dup trans");
     }
 
@@ -473,9 +474,9 @@ public class Manager {
       throw new ValidateSignatureException("trans sig validate failed");
     }
 
-    validateTapos(trx);
+    //validateTapos(trx);
 
-    validateCommon(trx);
+    //validateCommon(trx);
 
     //validateFreq(trx);
     synchronized (this) {
@@ -484,6 +485,8 @@ public class Manager {
       }
 
       try (RevokingStore.Dialog tmpDialog = revokingStore.buildDialog()) {
+        logger.info("taihao push transaction: "+ trx.getTransactionId() );
+        logger.info("taihao "+ trx.getTransactionId());
         processTransaction(trx);
         pendingTransactions.add(trx);
         tmpDialog.merge();
@@ -883,7 +886,7 @@ public class Manager {
     final List<Actuator> actuatorList = ActuatorFactory.createActuator(trxCap, this);
     TransactionResultCapsule ret = new TransactionResultCapsule();
 
-    consumeBandwidth(trxCap);
+    //consumeBandwidth(trxCap);
 
     for (Actuator act : actuatorList) {
       act.validate();
@@ -891,6 +894,7 @@ public class Manager {
       trxCap.setResult(ret);
     }
     transactionStore.put(trxCap.getTransactionId().getBytes(), trxCap);
+    logger.info("taihao transactionStore: "+ trxCap.getTransactionId());
     return true;
   }
 
@@ -948,6 +952,8 @@ public class Manager {
 
       // apply transaction
       try (Dialog tmpDialog = revokingStore.buildDialog()) {
+        logger.info("taihao processBlock: "+ trx.getTransactionId() );
+        logger.info("taihao "+ trx.getTransactionId());
         processTransaction(trx);
         tmpDialog.merge();
         // push into block
@@ -1022,6 +1028,8 @@ public class Manager {
       if (block.generatedByMyself) {
         transactionCapsule.setValidated(true);
       }
+      logger.info("taihao processBlock: "+ transactionCapsule.getTransactionId() );
+      logger.info("taihao "+ transactionCapsule.getTransactionId());
       processTransaction(transactionCapsule);
     }
 
