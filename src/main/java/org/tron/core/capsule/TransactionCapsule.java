@@ -342,7 +342,7 @@ public class TransactionCapsule implements ProtoCapsule<Transaction> {
 
     if (this.getInstance().getSignatureCount() !=
         this.getInstance().getRawData().getContractCount()) {
-      throw new ValidateSignatureException("miss sig or contract");
+      //throw new ValidateSignatureException("miss sig or contract");
     }
 
     List<Transaction.Contract> listContract = this.transaction.getRawData().getContractList();
